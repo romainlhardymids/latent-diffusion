@@ -74,6 +74,7 @@ class DDIMSampler(object):
                log_every_t=100,
                unconditional_guidance_scale=1.,
                unconditional_conditioning=None,
+               seed=0,
                # this has to come in the same format as the conditioning, # e.g. as encoded tokens, ...
                **kwargs
                ):
@@ -106,6 +107,7 @@ class DDIMSampler(object):
                                                     log_every_t=log_every_t,
                                                     unconditional_guidance_scale=unconditional_guidance_scale,
                                                     unconditional_conditioning=unconditional_conditioning,
+                                                    seed=seed,
                                                     )
         return samples, intermediates
 
@@ -115,11 +117,12 @@ class DDIMSampler(object):
                       callback=None, timesteps=None, quantize_denoised=False,
                       mask=None, x0=None, img_callback=None, log_every_t=100,
                       temperature=1., noise_dropout=0., score_corrector=None, corrector_kwargs=None,
-                      unconditional_guidance_scale=1., unconditional_conditioning=None,):
+                      unconditional_guidance_scale=1., unconditional_conditioning=None, seed=0):
         device = self.model.betas.device
         b = shape[0]
         if x_T is None:
-            img = torch.randn(shape, device=device)
+            generator = torch.Generator(device=device).manual_seed(seed)
+            img = torch.randn(shape, device=device, generator=generator)
         else:
             img = x_T
 
@@ -134,7 +137,7 @@ class DDIMSampler(object):
         total_steps = timesteps if ddim_use_original_steps else timesteps.shape[0]
         print(f"Running DDIM Sampling with {total_steps} timesteps")
 
-        iterator = tqdm(time_range, desc='DDIM Sampler', total=total_steps)
+        iterator = time_range
 
         for i, step in enumerate(iterator):
             index = total_steps - i - 1
