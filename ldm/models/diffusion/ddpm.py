@@ -502,10 +502,10 @@ class LatentDiffusion(DDPM):
     def instantiate_first_stage(self, config):
         model = instantiate_from_config(config)
         self.first_stage_model = model
-#         self.first_stage_model = model.eval()
-#         self.first_stage_model.train = disabled_train
-#         for param in self.first_stage_model.parameters():
-#             param.requires_grad = False
+        self.first_stage_model = model.eval()
+        self.first_stage_model.train = disabled_train
+        for param in self.first_stage_model.parameters():
+            param.requires_grad = False
 
     def instantiate_cond_stage(self, config):
         if not self.cond_stage_trainable:
@@ -651,7 +651,7 @@ class LatentDiffusion(DDPM):
 
         return fold, unfold, normalization, weighting
 
-#     @torch.no_grad()
+    @torch.no_grad()
     def get_input(self, batch, k, return_first_stage_outputs=False, force_c_encode=False,
                   cond_key=None, return_original_cond=False, bs=None):
         x = super().get_input(batch, k)
@@ -703,7 +703,7 @@ class LatentDiffusion(DDPM):
             out.append(xc)
         return out
 
-#     @torch.no_grad()
+    @torch.no_grad()
     def decode_first_stage(self, z, predict_cids=False, force_not_quantize=False):
         if predict_cids:
             if z.dim() == 4:
@@ -823,7 +823,7 @@ class LatentDiffusion(DDPM):
             else:
                 return self.first_stage_model.decode(z)
 
-#     @torch.no_grad()
+    @torch.no_grad()
     def encode_first_stage(self, x):
         if hasattr(self, "split_input_params"):
             if self.split_input_params["patch_distributed_vq"]:
